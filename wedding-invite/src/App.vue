@@ -738,8 +738,8 @@ const vReveal = {
         }
       },
       {
-        threshold: 0.05,
-        rootMargin: '120px 0px 120px 0px',
+        threshold: 0.12,
+        rootMargin: '0px 0px -12% 0px',
       }
     )
 
