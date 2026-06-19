@@ -722,19 +722,30 @@ const vReveal = {
   mounted(el) {
     el.classList.add('reveal')
 
+    let ticking = false
+
+    const resetIfOutside = () => {
+      if (ticking) return
+
+      ticking = true
+
+      requestAnimationFrame(() => {
+        const rect = el.getBoundingClientRect()
+        const viewportHeight = window.innerHeight || document.documentElement.clientHeight
+        const isOutside = rect.bottom < -80 || rect.top > viewportHeight + 80
+
+        if (isOutside) {
+          el.classList.remove('is-visible')
+        }
+
+        ticking = false
+      })
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           el.classList.add('is-visible')
-          return
-        }
-
-        const rect = el.getBoundingClientRect()
-        const viewportHeight = window.innerHeight || document.documentElement.clientHeight
-        const isFarFromViewport = rect.bottom < -120 || rect.top > viewportHeight + 120
-
-        if (isFarFromViewport) {
-          el.classList.remove('is-visible')
         }
       },
       {
@@ -744,11 +755,18 @@ const vReveal = {
     )
 
     observer.observe(el)
+    window.addEventListener('scroll', resetIfOutside, { passive: true })
+
     el._revealObserver = observer
+    el._revealReset = resetIfOutside
   },
 
   unmounted(el) {
     el._revealObserver?.disconnect()
+
+    if (el._revealReset) {
+      window.removeEventListener('scroll', el._revealReset)
+    }
   },
 }
 
